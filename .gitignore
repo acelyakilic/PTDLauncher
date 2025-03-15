@@ -49,6 +49,7 @@ cython_debug/
 .pypirc
 
 # PTD Launcher specific
+assets/
 *.swf
 flashplayer_sa.exe
 *.bak

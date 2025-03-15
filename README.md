@@ -33,6 +33,10 @@ PTD Launcher is a desktop application that allows you to play Pokemon Tower Defe
 
 ## Usage
 
+<p align="center">
+  <img src="assets/screenshot.png" alt="PTD Launcher Screenshot" width="490">
+</p>
+
 ### Playing Games
 - Click on any of the game buttons to launch the corresponding game
 - The launcher will automatically download any required files
