@@ -13,11 +13,32 @@ DEFAULT_SETTINGS = {
 
 def select_flash_player():
     try:
+        from utils import IS_WINDOWS, IS_MACOS, IS_LINUX
+        from updater import FLASH_FILENAME
+        
         logger.info("Selecting custom Flash Player executable")
-        file_path = filedialog.askopenfilename(
-            title="Select Flash Player Executable",
-            filetypes=[("Executable files", "*.exe"), ("All files", "*.*")]
-        )
+        
+        # Platform-specific file selection dialog
+        if IS_WINDOWS:
+            file_path = filedialog.askopenfilename(
+                title="Select Flash Player Executable",
+                filetypes=[("Executable files", "*.exe"), ("All files", "*.*")]
+            )
+        elif IS_MACOS:
+            file_path = filedialog.askopenfilename(
+                title="Select Flash Player Application",
+                filetypes=[("Application files", "*.app"), ("Disk Image", "*.dmg"), ("All files", "*.*")]
+            )
+        elif IS_LINUX:
+            file_path = filedialog.askopenfilename(
+                title="Select Flash Player Executable",
+                filetypes=[("All files", "*")]
+            )
+        else:
+            file_path = filedialog.askopenfilename(
+                title="Select Flash Player",
+                filetypes=[("All files", "*.*")]
+            )
         
         if not file_path or not os.path.exists(file_path):
             logger.info("Flash Player selection cancelled or file doesn't exist")
@@ -27,13 +48,54 @@ def select_flash_player():
             
         # Copy the selected file to the files directory
         try:
-            destination = get_file_path("flashplayer_sa.exe")
-            with open(file_path, 'rb') as src_file, open(destination, 'wb') as dst_file:
-                dst_file.write(src_file.read())
+            destination = get_file_path(FLASH_FILENAME)
+            
+            # Platform-specific handling for copying the Flash Player
+            if IS_MACOS and file_path.endswith('.dmg'):
+                # For macOS DMG files, inform user to manually install
+                messagebox.showinfo("Manual Installation Required", 
+                                   "Please manually install Flash Player from the selected DMG file.\n" + 
+                                   "After installation, copy the Flash Player.app to:\n" + 
+                                   destination)
+                return None
+            elif IS_LINUX and file_path.endswith('.tar.gz'):
+                # For Linux tar.gz files, extract and copy
+                try:
+                    import tarfile
+                    import shutil
+                    temp_dir = get_file_path("temp_extract")
+                    os.makedirs(temp_dir, exist_ok=True)
                     
+                    with tarfile.open(file_path, "r:gz") as tar:
+                        tar.extractall(path=temp_dir)
+                    
+                    # Find the Flash Player executable in the extracted files
+                    flash_exec = None
+                    for root, dirs, files in os.walk(temp_dir):
+                        for file in files:
+                            if "flash" in file.lower() and os.access(os.path.join(root, file), os.X_OK):
+                                flash_exec = os.path.join(root, file)
+                                break
+                    
+                    if flash_exec:
+                        shutil.copy2(flash_exec, destination)
+                        os.chmod(destination, 0o755)  # Make executable
+                    else:
+                        messagebox.showerror("Error", "Could not find Flash Player executable in the archive.")
+                        return None
+                except Exception as e:
+                    logger.error(f"Error extracting Flash Player: {str(e)}")
+                    messagebox.showerror("Error", f"Could not extract Flash Player: {str(e)}")
+                    return None
+            else:
+                # For Windows or direct executable files, just copy
+                with open(file_path, 'rb') as src_file, open(destination, 'wb') as dst_file:
+                    dst_file.write(src_file.read())
+            
             logger.info(f"Copied custom Flash Player from {file_path} to {destination}")
             
             # Update the version in versions.json
+            from version_manager import load_versions, save_versions
             versions = load_versions()
             versions["flash_player"] = "custom"
             save_versions(versions)

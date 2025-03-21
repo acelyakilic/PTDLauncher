@@ -38,10 +38,31 @@ def load_config():
         }
     }
 
+from utils import IS_WINDOWS, IS_MACOS, IS_LINUX, OS_TYPE
+
 CONFIG = load_config()
 FLASH_FALLBACK_VERSION = CONFIG["flash_player"]["fallback_version"]
-FLASH_PRIMARY_URL = CONFIG["flash_player"]["primary_url"]
-FLASH_FALLBACK_URL = CONFIG["flash_player"]["fallback_url"]
+
+# Get platform-specific Flash Player URLs
+if IS_WINDOWS:
+    FLASH_PRIMARY_URL = CONFIG["flash_player"]["windows"]["primary_url"]
+    FLASH_FALLBACK_URL = CONFIG["flash_player"]["windows"]["fallback_url"]
+    FLASH_FILENAME = CONFIG["flash_player"]["windows"]["filename"]
+elif IS_MACOS:
+    FLASH_PRIMARY_URL = CONFIG["flash_player"]["macos"]["primary_url"]
+    FLASH_FALLBACK_URL = CONFIG["flash_player"]["macos"]["fallback_url"]
+    FLASH_FILENAME = CONFIG["flash_player"]["macos"]["filename"]
+elif IS_LINUX:
+    FLASH_PRIMARY_URL = CONFIG["flash_player"]["linux"]["primary_url"]
+    FLASH_FALLBACK_URL = CONFIG["flash_player"]["linux"]["fallback_url"]
+    FLASH_FILENAME = CONFIG["flash_player"]["linux"]["filename"]
+else:
+    # Default to Windows if unknown platform
+    logger.warning(f"Unknown platform: {OS_TYPE}, defaulting to Windows")
+    FLASH_PRIMARY_URL = CONFIG["flash_player"]["windows"]["primary_url"]
+    FLASH_FALLBACK_URL = CONFIG["flash_player"]["windows"]["fallback_url"]
+    FLASH_FILENAME = CONFIG["flash_player"]["windows"]["filename"]
+
 GAME_URLS = CONFIG["game_urls"]
 
 def download_file(url, destination, progress_label=None, progress_bar=None, progress_start=0, progress_end=100, timeout=30, retries=3):
@@ -122,46 +143,86 @@ def check_flash_player_updates(versions, progress_label, progress_bar, update_wi
             return True
         
         latest_flash_version = FLASH_FALLBACK_VERSION
-        try:
-            for retry in range(3):
-                try:
-                    response = requests.get("https://api.flash.cn/config/flashVersion/", timeout=5)
-                    if response.status_code == 200:
-                        match = re.search(r"_flash_install_packages_\((.*)\);", response.text)
-                        if match:
-                            flash_data = json.loads(match.group(1))
-                            latest_flash_version = flash_data.get("activex", {}).get("version", FLASH_FALLBACK_VERSION)
-                            logger.info(f"Latest Flash Player version: {latest_flash_version}")
-                            break
-                    else:
-                        logger.warning(f"Flash version API returned status code {response.status_code}")
-                except Exception as e:
-                    if retry == 2:
-                        raise
-                    logger.warning(f"Retry {retry+1}/3 for Flash version check: {str(e)}")
-                    time.sleep(1 * (2 ** retry))
-        except Exception as e:
-            logger.warning(f"Error getting Flash Player version, using fallback {FLASH_FALLBACK_VERSION}: {str(e)}")
         
-        flash_player_path = get_file_path("flashplayer_sa.exe")
+        # Only check for latest version on Windows, as macOS and Linux have fixed versions
+        if IS_WINDOWS:
+            try:
+                for retry in range(3):
+                    try:
+                        response = requests.get("https://api.flash.cn/config/flashVersion/", timeout=5)
+                        if response.status_code == 200:
+                            match = re.search(r"_flash_install_packages_\((.*)\);", response.text)
+                            if match:
+                                flash_data = json.loads(match.group(1))
+                                latest_flash_version = flash_data.get("activex", {}).get("version", FLASH_FALLBACK_VERSION)
+                                logger.info(f"Latest Flash Player version: {latest_flash_version}")
+                                break
+                        else:
+                            logger.warning(f"Flash version API returned status code {response.status_code}")
+                    except Exception as e:
+                        if retry == 2:
+                            raise
+                        logger.warning(f"Retry {retry+1}/3 for Flash version check: {str(e)}")
+                        time.sleep(1 * (2 ** retry))
+            except Exception as e:
+                logger.warning(f"Error getting Flash Player version, using fallback {FLASH_FALLBACK_VERSION}: {str(e)}")
+        
+        # Get platform-specific Flash Player path
+        flash_player_path = get_file_path(FLASH_FILENAME)
+        
+        # Check if Flash Player needs to be updated or doesn't exist
         if latest_flash_version != versions["flash_player"] or not os.path.exists(flash_player_path):
             logger.info(f"Downloading Flash Player version {latest_flash_version}")
             progress_label.config(text="Downloading Flash Player...")
             progress_bar["value"] = 20
             update_window.update()
             
+            # For macOS and Linux, we need to download to a temporary file first
+            if IS_MACOS or IS_LINUX:
+                temp_download_path = get_file_path(f"flash_player_temp{'.dmg' if IS_MACOS else '.tar.gz'}")
+            else:
+                temp_download_path = flash_player_path
+            
             download_success = False
             try:
-                download_success = download_file(FLASH_PRIMARY_URL, flash_player_path, progress_label, progress_bar, 20, 30)
+                download_success = download_file(FLASH_PRIMARY_URL, temp_download_path, progress_label, progress_bar, 20, 25)
             except Exception as e:
                 logger.warning(f"Primary Flash Player download failed: {str(e)}")
                 
             if not download_success:
                 try:
-                    download_success = download_file(FLASH_FALLBACK_URL, flash_player_path, progress_label, progress_bar, 20, 30)
+                    download_success = download_file(FLASH_FALLBACK_URL, temp_download_path, progress_label, progress_bar, 20, 25)
                 except Exception as e:
                     logger.error(f"Fallback Flash Player download failed: {str(e)}")
                     progress_label.config(text="Flash Player download failed")
+                    update_window.update()
+                    time.sleep(2)
+                    return False
+            
+            # For macOS and Linux, we need to extract the downloaded file
+            if download_success and (IS_MACOS or IS_LINUX):
+                progress_label.config(text="Extracting Flash Player...")
+                progress_bar["value"] = 25
+                update_window.update()
+                
+                try:
+                    if IS_MACOS:
+                        # For macOS, we need to mount the DMG and copy the app
+                        # This would require additional platform-specific code
+                        # For now, we'll just inform the user to manually install
+                        messagebox.showinfo("Manual Installation Required", 
+                                           "Please manually install Flash Player from the downloaded DMG file at:\n" + 
+                                           temp_download_path)
+                    elif IS_LINUX:
+                        # For Linux, extract the tar.gz file
+                        import tarfile
+                        with tarfile.open(temp_download_path, "r:gz") as tar:
+                            tar.extractall(path=os.path.dirname(flash_player_path))
+                        # Make the Flash Player executable
+                        os.chmod(flash_player_path, 0o755)
+                except Exception as e:
+                    logger.error(f"Error extracting Flash Player: {str(e)}")
+                    progress_label.config(text="Flash Player extraction failed")
                     update_window.update()
                     time.sleep(2)
                     return False

@@ -1,6 +1,13 @@
 import sys
 import os
 import logging
+import platform
+
+# Detect operating system
+OS_TYPE = platform.system().lower()
+IS_WINDOWS = OS_TYPE == 'windows'
+IS_MACOS = OS_TYPE == 'darwin'
+IS_LINUX = OS_TYPE == 'linux'
 
 # Base directories
 BASE_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
