@@ -106,6 +106,6 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            artifacts/PTDLauncher-Windows.exe
-            artifacts/PTDLauncher-Linux
-            artifacts/PTDLauncher-macOS
+            artifacts/PTDLauncher-Windows/PTDLauncher.exe
+            artifacts/PTDLauncher-Linux/PTDLauncher-Linux
+            artifacts/PTDLauncher-macOS/PTDLauncher-macOS
