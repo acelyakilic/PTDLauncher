@@ -1,4 +1,4 @@
-name: Build PTDLauncher
+name: Build and Release PTDLauncher
 
 on:
   push:
@@ -46,6 +46,7 @@ jobs:
             --add-data "resources/off.mp3;resources" `
             --add-data "resources/on.mp3;resources" `
             PTDLauncher.py
+          mv dist/PTDLauncher.exe dist/PTDLauncher-Windows.exe
 
       - name: Build for Linux
         if: runner.os == 'Linux'
@@ -62,6 +63,7 @@ jobs:
             --add-data "resources/off.mp3:resources" \
             --add-data "resources/on.mp3:resources" \
             PTDLauncher.py
+          mv dist/PTDLauncher dist/PTDLauncher-Linux
 
       - name: Build for macOS
         if: runner.os == 'macOS'
@@ -78,9 +80,32 @@ jobs:
             --add-data "resources/off.mp3:resources" \
             --add-data "resources/on.mp3:resources" \
             PTDLauncher.py
+          mv dist/PTDLauncher dist/PTDLauncher-macOS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: PTDLauncher-${{ runner.os }}
           path: dist/PTDLauncher*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: v1.0.${{ github.run_number }}
+          name: "PTDLauncher Release v1.0.${{ github.run_number }}"
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/PTDLauncher-Windows.exe
+            artifacts/PTDLauncher-Linux
+            artifacts/PTDLauncher-macOS
