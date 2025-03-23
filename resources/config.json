@@ -1,0 +1,16 @@
+{
+    "flash_player": {
+        "fallback_version": "32.0.0.465",
+        "primary_url": "https://www.flash.cn/cdm/latest/flashplayer_sa.exe",
+        "fallback_url": "https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.exe"
+    },
+    "game_urls": {
+        "PTD1": "https://ptd.onl/ptd1-latest.swf",
+        "PTD1RF": "https://ptd.onl/ptd1rf-latest.swf",
+        "PTD1_Hacked": "https://ptd.onl/ptd1-hacked-latest.swf",
+        "PTD2": "https://ptd.onl/ptd2-latest.swf",
+        "PTD2_Hacked": "https://ptd.onl/ptd2-hacked-latest.swf",
+        "PTD3": "https://ptd.onl/ptd3-latest.swf",
+        "PTD3_Hacked": "https://ptd.onl/ptd3-hacked-latest.swf"
+    }
+}
