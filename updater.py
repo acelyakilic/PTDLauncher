@@ -7,6 +7,7 @@ import requests
 from tkinter import Toplevel
 import tkinter as tk
 from base_manager import BaseManager
+from config import resource_path
 
 class UpdateManager(BaseManager):
     def __init__(self, config_manager, game_manager, status_callback=None):
@@ -112,7 +113,7 @@ class UpdateManager(BaseManager):
 
         # Set the window icon
         if platform.system() == "Windows":
-            update_window.iconbitmap("resources/favicon-original.ico")
+            update_window.iconbitmap(resource_path("resources/favicon-original.ico"))
         
         # Create content
         tk.Label(update_window, text="The following updates are available:").pack(pady=10)

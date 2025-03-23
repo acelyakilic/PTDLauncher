@@ -7,6 +7,16 @@ from tkinter import messagebox
 from base_manager import BaseManager
 from pathlib import Path
 
+def resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    
+    return os.path.join(base_path, relative_path)
+
 class ConfigManager(BaseManager):
     def __init__(self, status_callback=None):
         super().__init__(status_callback)
@@ -31,7 +41,8 @@ class ConfigManager(BaseManager):
     def load_config(self):
         """Load configuration from config.json"""
         try:
-            with open("resources/config.json", "r") as f:
+            config_path = resource_path("resources/config.json")
+            with open(config_path, "r") as f:
                 self.config = json.load(f)
             
             # Get games directory path based on OS
@@ -44,9 +55,10 @@ class ConfigManager(BaseManager):
             version_path = os.path.join(self.games_dir, "version.json")
             
             # If version.json doesn't exist in games directory but exists in resources, move it
-            if not os.path.exists(version_path) and os.path.exists("resources/version.json"):
+            version_resource_path = resource_path("resources/version.json")
+            if not os.path.exists(version_path) and os.path.exists(version_resource_path):
                 try:
-                    with open("resources/version.json", "r") as f:
+                    with open(version_resource_path, "r") as f:
                         version_data = json.load(f)
                     
                     with open(version_path, "w") as f:

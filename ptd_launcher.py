@@ -7,7 +7,7 @@ from tkinter import ttk
 import webbrowser
 
 # Import our modules
-from config import ConfigManager
+from config import ConfigManager, resource_path
 from sound_manager import SoundManager
 from flash_manager import FlashManager
 from game_manager import GameManager
@@ -22,7 +22,7 @@ class PTDLauncher:
         
         # Set the window icon
         if platform.system() == "Windows":
-            self.root.iconbitmap("resources/favicon-original.ico")
+            self.root.iconbitmap(resource_path("resources/favicon-original.ico"))
         
         # Initialize managers
         self.config_manager = ConfigManager()
@@ -100,7 +100,7 @@ class PTDLauncher:
         header_frame.pack(fill=tk.X)
         
         # Add the Pokemon Tower Defense logo
-        logo_img = tk.PhotoImage(file="resources/logo.png")
+        logo_img = tk.PhotoImage(file=resource_path("resources/logo.png"))
         logo_label = tk.Label(header_frame, image=logo_img, bg="#4A6EA9")
         logo_label.image = logo_img  # Keep a reference
         logo_label.pack(side=tk.LEFT, padx=15)
@@ -109,13 +109,13 @@ class PTDLauncher:
         button_frame = tk.Frame(header_frame, bg="#4A6EA9")
         button_frame.pack(side=tk.RIGHT, padx=10)
         
-        settings_img = tk.PhotoImage(file="resources/settings.png")
+        settings_img = tk.PhotoImage(file=resource_path("resources/settings.png"))
         settings_btn = tk.Button(button_frame, image=settings_img, bg="#4A6EA9", bd=0,
                                 command=self.open_settings)
         settings_btn.image = settings_img  # Keep a reference
         settings_btn.pack(side=tk.RIGHT, padx=5)
 
-        update_img = tk.PhotoImage(file="resources/update.png")
+        update_img = tk.PhotoImage(file=resource_path("resources/update.png"))
         update_btn = tk.Button(button_frame, image=update_img, bg="#4A6EA9", bd=0, 
                               command=lambda: self.update_manager.check_updates(self.root))
         update_btn.image = update_img  # Keep a reference
@@ -271,7 +271,7 @@ class PTDLauncher:
         
         # Set the window icon
         if platform.system() == "Windows":
-            settings_window.iconbitmap("resources/favicon-original.ico")
+            settings_window.iconbitmap(resource_path("resources/favicon-original.ico"))
         
         # Create the settings UI
         self._create_settings_ui(settings_window)

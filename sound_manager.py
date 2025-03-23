@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import pygame
 import os
+from config import resource_path
 
 class SoundManager:
     def __init__(self, config_manager=None):
@@ -18,9 +19,10 @@ class SoundManager:
         # Load sounds lazily
         self.sounds = {}
         for sound_name, sound_path in sound_files.items():
-            if os.path.exists(sound_path):
+            full_path = resource_path(sound_path)
+            if os.path.exists(full_path):
                 try:
-                    self.sounds[sound_name] = pygame.mixer.Sound(sound_path)
+                    self.sounds[sound_name] = pygame.mixer.Sound(full_path)
                 except Exception as e:
                     print(f"Error loading sound {sound_name}: {str(e)}")
         
