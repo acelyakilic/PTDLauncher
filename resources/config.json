@@ -1,8 +1,19 @@
 {
     "flash_player": {
         "fallback_version": "32.0.0.465",
-        "primary_url": "https://www.flash.cn/cdm/latest/flashplayer_sa.exe",
-        "fallback_url": "https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.exe"
+        "windows": {
+            "primary_url": "https://www.flash.cn/cdm/latest/flashplayer_sa.exe",
+            "fallback_url": "https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.exe",
+            "filename": "flashplayer_sa.exe"
+        },
+        "macos": {
+            "primary_url": "https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.dmg",
+            "filename": "Flash Player.app"
+        },
+        "linux": {
+            "primary_url": "https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flash_player_sa_linux.x86_64.tar.gz",
+            "filename": "flash_player_sa_linux.x86_64"
+        }
     },
     "game_urls": {
         "PTD1": "https://ptd.onl/ptd1-latest.swf",

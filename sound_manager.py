@@ -1,39 +1,46 @@
+#!/usr/bin/env python3
 import pygame
 import os
-from utils import get_resource_path, logger
 
-# Global variables with proper naming
-sound_cache = {}
-sound_enabled = True
-
-def init_sound():
-    try:
+class SoundManager:
+    def __init__(self, config_manager=None):
+        # Initialize pygame mixer for sound effects
         pygame.mixer.init()
-        return True
-    except pygame.error:
-        logger.warning("Sound initialization failed")
-        return False
-
-def set_sound_enabled(enabled):
-    global sound_enabled
-    sound_enabled = enabled
-    logger.info(f"Sound {'enabled' if enabled else 'disabled'}")
-
-def get_sound_enabled():
-    return sound_enabled
-
-def play_sound(file):
-    if not sound_enabled:
-        return
         
-    try:
-        if file not in sound_cache:
-            sound_path = get_resource_path(file)
-            if not os.path.exists(sound_path):
-                logger.warning(f"Sound file not found: {file}")
-                return
-            sound_cache[file] = pygame.mixer.Sound(sound_path)
+        # Define sound files
+        sound_files = {
+            "on": "resources/on.mp3",
+            "off": "resources/off.mp3",
+            "opentab": "resources/opentab.mp3",
+            "closetab": "resources/closetab.mp3"
+        }
         
-        sound_cache[file].play()
-    except Exception as e:
-        logger.error(f"Error playing sound {file}: {str(e)}")
+        # Load sounds lazily
+        self.sounds = {}
+        for sound_name, sound_path in sound_files.items():
+            if os.path.exists(sound_path):
+                try:
+                    self.sounds[sound_name] = pygame.mixer.Sound(sound_path)
+                except Exception as e:
+                    print(f"Error loading sound {sound_name}: {str(e)}")
+        
+        # Load sound enabled setting from config if available
+        self.enabled = True
+        if config_manager:
+            settings = config_manager.load_settings()
+            if "sound_enabled" in settings:
+                self.enabled = settings["sound_enabled"]
+    
+    def play_sound(self, sound_name):
+        """Play a sound effect"""
+        if not self.enabled or sound_name not in self.sounds:
+            return
+            
+        try:
+            self.sounds[sound_name].play()
+        except Exception as e:
+            print(f"Error playing sound: {str(e)}")
+    
+    def set_enabled(self, enabled):
+        """Enable or disable sound effects"""
+        self.enabled = enabled

@@ -1,7 +1,7 @@
 # PTD Launcher
 
 <p align="center">
-  <img src="resources/top.png" alt="PTD Launcher Logo" width="490">
+  <img src="resources/logo.png" alt="PTD Launcher Logo" width="490">
 </p>
 
 ## Overview
@@ -23,13 +23,13 @@ PTD Launcher is a desktop application that allows you to play Pokemon Tower Defe
 ## Installation
 
 ### Requirements
-- Windows operating system
+- Windows, Linux(Ubuntu based), macOS operating system
 - Internet connection for updates and downloading game files
 
 ### Setup
 1. Download the latest release from the releases page
 2. Extract the ZIP file to a location of your choice
-3. Run `PTDLauncher.exe` to start the application
+3. Run `PTDLauncher` to start the application
 
 ## Usage
 
@@ -53,9 +53,8 @@ PTD Launcher is a desktop application that allows you to play Pokemon Tower Defe
 ## Building from Source
 
 1. Clone the repository
-2. Install the required dependencies: `pip install pillow pygame pygetwindow requests` (if available)
+2. Install the required dependencies: `pip install pygame requests` (if available)
 3. Run `python PTDLauncher.py` to start the application
-4. To build an executable, run `build.bat`
 
 ## License
 This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
