@@ -145,25 +145,37 @@ class ConfigManager(BaseManager):
             return None
             
         if system == "Windows":
-            return {
+            info = {
                 "url": self.config["flash_player"]["windows"]["primary_url"],
                 "filename": self.config["flash_player"]["windows"]["filename"],
                 "full_path": os.path.join(flash_dir, self.config["flash_player"]["windows"]["filename"])
             }
+            # Add fallback URL if available
+            if "fallback_url" in self.config["flash_player"]["windows"]:
+                info["fallback_url"] = self.config["flash_player"]["windows"]["fallback_url"]
+            return info
         elif system == "Darwin":  # macOS
-            return {
+            info = {
                 "url": self.config["flash_player"]["macos"]["primary_url"],
                 "filename": "flash_player.dmg",
                 "full_path": os.path.join(flash_dir, "flash_player.dmg"),
                 "app_name": self.config["flash_player"]["macos"]["filename"]
             }
+            # Add fallback URL if available
+            if "fallback_url" in self.config["flash_player"]["macos"]:
+                info["fallback_url"] = self.config["flash_player"]["macos"]["fallback_url"]
+            return info
         elif system == "Linux":
-            return {
+            info = {
                 "url": self.config["flash_player"]["linux"]["primary_url"],
                 "filename": "flash_player.tar.gz",
                 "full_path": os.path.join(flash_dir, "flash_player.tar.gz"),
                 "bin_name": self.config["flash_player"]["linux"]["filename"]
             }
+            # Add fallback URL if available
+            if "fallback_url" in self.config["flash_player"]["linux"]:
+                info["fallback_url"] = self.config["flash_player"]["linux"]["fallback_url"]
+            return info
         else:
             return None
     

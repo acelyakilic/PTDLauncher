@@ -247,8 +247,52 @@ class PTDLauncher:
         }
         
         if game in pokecenter_urls:
-            webbrowser.open(pokecenter_urls[game])
-            self.update_status(f"Opened {game} PokéCenter")
+            try:
+                # Try to open the browser
+                webbrowser.open(pokecenter_urls[game])
+                self.update_status(f"Opened {game} PokéCenter")
+            except Exception as e:
+                # If there's an error, show a dialog with the URL
+                error_msg = f"Failed to open browser: {str(e)}\n\nPlease manually visit:\n{pokecenter_urls[game]}"
+                self.flash_manager.show_dialog(self.root, "Browser Error", error_msg, dialog_type="warning")
+                
+                # Create a dialog with a copyable URL
+                self._show_url_dialog(game, pokecenter_urls[game])
+    
+    def _show_url_dialog(self, game, url):
+        """Show a dialog with a copyable URL"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title(f"{game} PokéCenter URL")
+        dialog.geometry("500x150")
+        dialog.resizable(False, False)
+        
+        # Center the dialog
+        self.flash_manager.center_window(dialog, self.root)
+        
+        # Create the content
+        frame = tk.Frame(dialog, padx=20, pady=20)
+        frame.pack(fill=tk.BOTH, expand=True)
+        
+        tk.Label(frame, text="Please copy this URL and paste it into your browser:", font=("Arial", 11)).pack(pady=(0, 10))
+        
+        # URL entry for copying
+        url_var = tk.StringVar(value=url)
+        url_entry = tk.Entry(frame, textvariable=url_var, width=50, font=("Arial", 10))
+        url_entry.pack(fill=tk.X, pady=5)
+        url_entry.select_range(0, tk.END)
+        
+        # Copy button
+        def copy_url():
+            dialog.clipboard_clear()
+            dialog.clipboard_append(url)
+            copy_btn.config(text="Copied!")
+            dialog.after(1000, lambda: copy_btn.config(text="Copy URL"))
+        
+        copy_btn = tk.Button(frame, text="Copy URL", command=copy_url, bg="#4A6EA9", fg="white", font=("Arial", 11))
+        copy_btn.pack(pady=10)
+        
+        # Focus the entry for easy copying
+        url_entry.focus_set()
     
     def play_game(self, game):
         """Play the specified game"""

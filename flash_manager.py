@@ -59,12 +59,30 @@ class FlashManager(BaseManager):
                 self.is_downloading = False
                 return None
             
-            # Download the file
-            with requests.get(download_info["url"], stream=True) as r:
-                r.raise_for_status()
-                with open(download_info["full_path"], 'wb') as f:
-                    for chunk in r.iter_content(chunk_size=8192):
-                        f.write(chunk)
+            # Try to download from primary URL first
+            try:
+                self.set_status("Downloading Flash Player from primary source...")
+                with requests.get(download_info["url"], stream=True, timeout=30) as r:
+                    r.raise_for_status()
+                    with open(download_info["full_path"], 'wb') as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+            except Exception as e:
+                # If primary URL fails and fallback URL exists, try the fallback
+                if "fallback_url" in download_info:
+                    self.set_status(f"Primary download failed, trying fallback source...")
+                    print(f"Primary download failed: {str(e)}")
+                    try:
+                        with requests.get(download_info["fallback_url"], stream=True, timeout=30) as r:
+                            r.raise_for_status()
+                            with open(download_info["full_path"], 'wb') as f:
+                                for chunk in r.iter_content(chunk_size=8192):
+                                    f.write(chunk)
+                    except Exception as fallback_error:
+                        raise Exception(f"Both primary and fallback downloads failed. Primary: {str(e)}, Fallback: {str(fallback_error)}")
+                else:
+                    # No fallback URL, re-raise the original exception
+                    raise
             
             # Process the downloaded file based on OS
             system = platform.system()
@@ -83,9 +101,28 @@ class FlashManager(BaseManager):
                 with tarfile.open(download_info["full_path"], "r:gz") as tar:
                     tar.extractall(path=flash_dir)
                 os.remove(download_info["full_path"])
+                
                 # Make the binary executable
                 flash_bin = os.path.join(flash_dir, download_info["bin_name"])
-                os.chmod(flash_bin, 0o755)
+                
+                # Check if the binary exists
+                if not os.path.exists(flash_bin):
+                    # Try to find the binary in the extracted files
+                    for root, dirs, files in os.walk(flash_dir):
+                        for file in files:
+                            if file == download_info["bin_name"]:
+                                flash_bin = os.path.join(root, file)
+                                break
+                
+                # If we found the binary, make it executable
+                if os.path.exists(flash_bin):
+                    os.chmod(flash_bin, 0o755)
+                    # If the binary is not in the expected location, move it there
+                    expected_path = os.path.join(flash_dir, download_info["bin_name"])
+                    if flash_bin != expected_path:
+                        shutil.move(flash_bin, expected_path)
+                else:
+                    raise Exception(f"Could not find Flash Player binary after extraction. Expected: {download_info['bin_name']}")
             
             self.set_status("Flash Player downloaded successfully")
             self.show_dialog(parent, "Success", "Flash Player has been downloaded successfully", dialog_type="info")

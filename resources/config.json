@@ -12,6 +12,7 @@
         },
         "linux": {
             "primary_url": "https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flash_player_sa_linux.x86_64.tar.gz",
+            "fallback_url": "https://archive.org/download/flashplayer_standalone_projectors/flash_player_sa_linux.x86_64.tar.gz",
             "filename": "flash_player_sa_linux.x86_64"
         }
     },
