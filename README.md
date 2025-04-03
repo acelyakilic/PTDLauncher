@@ -36,6 +36,12 @@ PTD Launcher is a desktop application that allows you to play Pokemon Tower Defe
 <p align="center">
   <img src="assets/screenshot.png" alt="PTD Launcher Screenshot" width="490">
 </p>
+### In Linux
+To make Flash Player work and be able to run games on Linux, you need to run the following commands:
+First:
+```sudo apt update
+Then:
+```sudo apt install libgtk2.0-0
 
 ### Playing Games
 - Click on any of the game buttons to launch the corresponding game
