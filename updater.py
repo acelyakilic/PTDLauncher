@@ -231,8 +231,8 @@ class UpdateManager(BaseManager):
             except:
                 pass
     
-    def _delete_old_game_files(self, game, current_version):
-        """Delete old versions of a game"""
+    """def _delete_old_game_files(self, game, current_version):
+        #Delete old versions of a game
         try:
             # Find all files for this game
             game_files = [f for f in os.listdir(self.config_manager.games_dir) 
@@ -254,7 +254,7 @@ class UpdateManager(BaseManager):
             return len(old_files)
         except Exception as e:
             print(f"Error cleaning up old files for {game}: {str(e)}")
-            return 0
+            return 0"""
     
     def _download_game_internal(self, game, progress_callback=None, parent=None):
         """
@@ -280,7 +280,7 @@ class UpdateManager(BaseManager):
             _, version = self._extract_filename_and_version(url, response)
             
             # Create filename with version
-            game_filename = f"{game}-v{version}.swf"
+            game_filename = f"{game}.swf"
             file_path = os.path.join(self.config_manager.games_dir, game_filename)
             
             # Download the file with progress updates if callback provided
@@ -311,13 +311,13 @@ class UpdateManager(BaseManager):
             self.config_manager.save_version_info()
             
             # Delete old versions
-            deleted_count = self._delete_old_game_files(game, version)
+            #deleted_count = self._delete_old_game_files(game, version)
             
             # Update status message
-            if deleted_count > 0:
-                self.set_status(f"{game} v{version} downloaded successfully. Deleted {deleted_count} old version(s).")
-            else:
-                self.set_status(f"{game} v{version} downloaded successfully")
+            #if deleted_count > 0:
+            #    self.set_status(f"{game} v{version} downloaded successfully. Deleted {deleted_count} old version(s).")
+            #else:
+            self.set_status(f"{game} v{version} downloaded successfully")
                 
             return file_path, version
             

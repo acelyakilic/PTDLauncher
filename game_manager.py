@@ -32,10 +32,10 @@ class GameManager(BaseManager):
             # Create a list to store potential paths to check
             paths_to_check = []
             
-            # 1. First check if the specific version from config exists
+            """# 1. First check if the specific version from config exists
             game_version = self.config_manager.version["games"].get(game, "")
             if game_version:
-                paths_to_check.append(os.path.join(games_dir, f"{game}-v{game_version}.swf"))
+                paths_to_check.append(os.path.join(games_dir, f"{game}-v{game_version}.swf"))"""
             
             # 2. Check for legacy format (no version in filename)
             paths_to_check.append(os.path.join(games_dir, f"{game}.swf"))
