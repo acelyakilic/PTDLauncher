@@ -1,6 +1,6 @@
 # PTD Launcher
 
-![PTD Launcher Logo](assets/logo.png)
+![PTD Launcher Logo](resources/logo.png)
 
 ## Overview
 PTD Launcher is a desktop application that allows you to play **Pokemon Tower Defense (PTD)** games using Flash Player. This launcher provides an easy way to access different versions of PTD games, including the original games and hacked versions.
