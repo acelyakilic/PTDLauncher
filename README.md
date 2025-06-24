@@ -1,8 +1,6 @@
 # PTD Launcher
 
-<p align="center">
-  <img src="resources/logo.png" alt="PTD Launcher Logo" width="490">
-</p>
+![PTD Launcher Logo](assets/logo.png)
 
 ## Overview
 PTD Launcher is a desktop application that allows you to play **Pokemon Tower Defense (PTD)** games using Flash Player. This launcher provides an easy way to access different versions of PTD games, including the original games and hacked versions.
@@ -33,9 +31,7 @@ PTD Launcher is a desktop application that allows you to play **Pokemon Tower De
 
 ## Usage
 
-<p align="center">
-  <img src="assets/screenshot.png" alt="PTD Launcher Screenshot" width="490">
-</p>
+![PTD Launcher Screenshot](assets/screenshot.png)
 
 ### Running on Linux
 To make Flash Player work and be able to run games on Linux, execute the following commands:
@@ -66,7 +62,7 @@ sudo apt install libgtk2.0-0
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/PTD-Launcher.git
+   git clone https://github.com/acelyakilic/PTD-Launcher.git
    ```
 2. Install the required dependencies:
    ```bash
