@@ -17,18 +17,31 @@ class BaseManager:
     def center_window(self, window, parent):
         """Center a window on its parent"""
         window.update_idletasks()
+        window.update()
         
-        # Get parent window position and size
-        parent_x = parent.winfo_x()
-        parent_y = parent.winfo_y()
-        parent_width = parent.winfo_width()
-        parent_height = parent.winfo_height()
-        
-        # Calculate position
-        width = window.winfo_width()
-        height = window.winfo_height()
-        x = parent_x + (parent_width // 2) - (width // 2)
-        y = parent_y + (parent_height // 2) - (height // 2)
+        # If parent is None, center on screen
+        if parent is None:
+            # Get screen dimensions
+            screen_width = window.winfo_screenwidth()
+            screen_height = window.winfo_screenheight()
+            
+            # Calculate position to center on screen
+            width = window.winfo_width()
+            height = window.winfo_height()
+            x = (screen_width // 2) - (width // 2)
+            y = (screen_height // 2) - (height // 2)
+        else:
+            # Get parent window position and size
+            parent_x = parent.winfo_x()
+            parent_y = parent.winfo_y()
+            parent_width = parent.winfo_width()
+            parent_height = parent.winfo_height()
+            
+            # Calculate position
+            width = window.winfo_width()
+            height = window.winfo_height()
+            x = parent_x + (parent_width // 2) - (width // 2)
+            y = parent_y + (parent_height // 2) - (height // 2)
         
         # Set position
         window.geometry(f"{width}x{height}+{x}+{y}")
@@ -61,6 +74,7 @@ class BaseManager:
         dialog = Toplevel(parent)
         dialog.title(title)
         dialog.geometry(f"{width}x{height}")
+        dialog.minsize(width, height)
         dialog.resizable(False, False)
         dialog.transient(parent)  # Set to be on top of the parent window
         dialog.grab_set()  # Make the dialog modal

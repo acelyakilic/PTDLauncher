@@ -5,24 +5,28 @@ from tkinter import messagebox
 from base_manager import BaseManager
 
 class GameManager(BaseManager):
-    def __init__(self, config_manager, flash_manager, status_callback=None, update_manager=None):
+    def __init__(self, config_manager, flash_manager, download_manager=None, status_callback=None, update_manager=None):
         super().__init__(status_callback)
         self.config_manager = config_manager
         self.flash_manager = flash_manager
+        self.download_manager = download_manager
         self._update_manager = update_manager
     
     def set_update_manager(self, update_manager):
         """Set the update manager reference to avoid circular imports"""
         self._update_manager = update_manager
     
-    def download_game(self, game):
-        """Download or update a game by calling UpdateManager's download_game method"""
-        # Use the update manager if it's available
-        if not self._update_manager:
-            self.set_status("Update manager not available")
+    def download_game(self, game, parent=None):
+        """Download or update a game using DownloadManager"""
+        # Use the download manager if it's available
+        if self.download_manager:
+            return self.download_manager.download_game(game, parent)
+        elif self._update_manager:
+            # Fallback to update manager for backward compatibility
+            return self._update_manager.download_game(game, parent=parent)
+        else:
+            self.set_status("Download manager not available")
             return None
-            
-        return self._update_manager.download_game(game)
     
     def find_game_path(self, game):
         """Find the path to the latest version of a game"""
@@ -83,7 +87,7 @@ class GameManager(BaseManager):
             result = self.show_dialog(parent, "Game not found", 
                                     f"{game} is not downloaded.\nDo you want to download it now?")
             if result:
-                game_path = self.download_game(game)
+                game_path = self.download_game(game, parent)
                 if not game_path:
                     return False
             else:

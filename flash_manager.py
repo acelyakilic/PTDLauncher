@@ -2,22 +2,20 @@
 import os
 import platform
 import subprocess
-import requests
-import tempfile
-import shutil
 from tkinter import messagebox, Toplevel
-import tarfile
 from base_manager import BaseManager
 
 class FlashManager(BaseManager):
-    def __init__(self, config_manager, status_callback=None):
+    def __init__(self, config_manager, download_manager=None, status_callback=None):
         super().__init__(status_callback)
         self.config_manager = config_manager
-        self.is_downloading = False
+        self.download_manager = download_manager
     
     def is_download_in_progress(self):
         """Check if a download is currently in progress"""
-        return self.is_downloading
+        if self.download_manager:
+            return self.download_manager.is_download_in_progress()
+        return False
     
     def check_flash_player(self, parent=None):
         """Check if Flash Player is installed and download if needed"""
@@ -34,115 +32,11 @@ class FlashManager(BaseManager):
         return flash_path
     
     def download_flash_player(self, parent=None):
-        """Download Flash Player for the current OS"""
-        # If already downloading, don't start another download
-        if self.is_downloading:
-            return None
-            
-        self.is_downloading = True
-        self.set_status("Downloading Flash Player...")
-        
-        # Create directory for Flash Player
-        flash_dir = self.config_manager.get_flash_dir()
-        if not flash_dir:
-            self.show_dialog(parent, "Error", "Unsupported operating system", dialog_type="error")
-            self.is_downloading = False
-            return None
-        
-        os.makedirs(flash_dir, exist_ok=True)
-        
-        # Download Flash Player
-        try:
-            download_info = self.config_manager.get_flash_download_info()
-            if not download_info:
-                self.show_dialog(parent, "Error", "Unsupported operating system", dialog_type="error")
-                self.is_downloading = False
-                return None
-            
-            # Try to download from primary URL first
-            try:
-                self.set_status("Downloading Flash Player from primary source...")
-                with requests.get(download_info["url"], stream=True, timeout=30) as r:
-                    r.raise_for_status()
-                    with open(download_info["full_path"], 'wb') as f:
-                        for chunk in r.iter_content(chunk_size=8192):
-                            f.write(chunk)
-            except Exception as e:
-                # If primary URL fails and fallback URL exists, try the fallback
-                if "fallback_url" in download_info:
-                    self.set_status(f"Primary download failed, trying fallback source...")
-                    print(f"Primary download failed: {str(e)}")
-                    try:
-                        with requests.get(download_info["fallback_url"], stream=True, timeout=30) as r:
-                            r.raise_for_status()
-                            with open(download_info["full_path"], 'wb') as f:
-                                for chunk in r.iter_content(chunk_size=8192):
-                                    f.write(chunk)
-                    except Exception as fallback_error:
-                        raise Exception(f"Both primary and fallback downloads failed. Primary: {str(e)}, Fallback: {str(fallback_error)}")
-                else:
-                    # No fallback URL, re-raise the original exception
-                    raise
-            
-            # Process the downloaded file based on OS
-            system = platform.system()
-            if system == "Darwin":  # macOS
-                # Mount DMG and copy the app
-                mount_point = tempfile.mkdtemp()
-                subprocess.run(["hdiutil", "attach", download_info["full_path"], "-mountpoint", mount_point])
-                app_path = os.path.join(mount_point, download_info["app_name"])
-                dest_path = os.path.join(flash_dir, download_info["app_name"])
-                shutil.copytree(app_path, dest_path)
-                subprocess.run(["hdiutil", "detach", mount_point])
-                shutil.rmtree(mount_point)
-                os.remove(download_info["full_path"])
-            elif system == "Linux":
-                # Extract tar.gz file
-                with tarfile.open(download_info["full_path"], "r:gz") as tar:
-                    tar.extractall(path=flash_dir)
-                os.remove(download_info["full_path"])
-                
-                # Make the binary executable
-                flash_bin = os.path.join(flash_dir, download_info["bin_name"])
-                
-                # Check if the binary exists
-                if not os.path.exists(flash_bin):
-                    # Try to find the binary in the extracted files
-                    for root, dirs, files in os.walk(flash_dir):
-                        for file in files:
-                            if file == download_info["bin_name"]:
-                                flash_bin = os.path.join(root, file)
-                                break
-                
-                # If we found the binary, make it executable
-                if os.path.exists(flash_bin):
-                    os.chmod(flash_bin, 0o755)
-                    # If the binary is not in the expected location, move it there
-                    expected_path = os.path.join(flash_dir, download_info["bin_name"])
-                    if flash_bin != expected_path:
-                        shutil.move(flash_bin, expected_path)
-                else:
-                    raise Exception(f"Could not find Flash Player binary after extraction. Expected: {download_info['bin_name']}")
-            
-            self.set_status("Flash Player downloaded successfully")
-            self.show_dialog(parent, "Success", "Flash Player has been downloaded successfully", dialog_type="info")
-            
-            # Update version information
-            self.config_manager.version["flash_player"] = self.config_manager.config["flash_player"]["fallback_version"]
-            self.config_manager.save_version_info()
-            
-            # Reset downloading flag
-            self.is_downloading = False
-            
-            return self.config_manager.get_flash_player_path()
-            
-        except Exception as e:
-            self.set_status("Failed to download Flash Player")
-            self.show_dialog(parent, "Error", f"Failed to download Flash Player: {str(e)}", dialog_type="error")
-            
-            # Reset downloading flag even if there's an error
-            self.is_downloading = False
-            
+        """Download Flash Player using DownloadManager"""
+        if self.download_manager:
+            return self.download_manager.download_flash_player(parent)
+        else:
+            self.show_dialog(parent, "Error", "Download manager not available", dialog_type="error")
             return None
     
     def launch_game(self, game_path, parent=None):

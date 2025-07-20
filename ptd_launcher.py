@@ -9,6 +9,7 @@ import webbrowser
 # Import our modules
 from config import ConfigManager, resource_path
 from sound_manager import SoundManager
+from download_manager import DownloadManager
 from flash_manager import FlashManager
 from game_manager import GameManager
 from updater import UpdateManager
@@ -26,8 +27,15 @@ class PTDLauncher:
         
         self.sound_manager = SoundManager(self.config_manager)
         
+        # Initialize download manager
+        self.download_manager = DownloadManager(
+            self.config_manager,
+            status_callback=self.update_status
+        )
+        
         self.flash_manager = FlashManager(
-            self.config_manager, 
+            self.config_manager,
+            download_manager=self.download_manager,
             status_callback=self.update_status
         )
         
@@ -35,17 +43,20 @@ class PTDLauncher:
         self.game_manager = GameManager(
             self.config_manager,
             self.flash_manager,
+            download_manager=self.download_manager,
             status_callback=self.update_status
         )
         
         self.update_manager = UpdateManager(
             self.config_manager,
             self.game_manager,
+            download_manager=self.download_manager,
             status_callback=self.update_status
         )
         
         # Set up the circular reference
         self.game_manager.set_update_manager(self.update_manager)
+        self.download_manager.set_update_manager(self.update_manager)
         
         # Define common button style
         self.button_style = {
@@ -68,11 +79,21 @@ class PTDLauncher:
     
     def check_flash_and_games(self):
         """Check Flash Player on startup"""
-        # Check Flash Player
-        flash_path = self.flash_manager.check_flash_player(self.root)
+        # Schedule the flash check after the main loop starts
+        self.root.after(100, self._delayed_flash_check)
         
         # Set status to ready
         self.update_status("Ready to play")
+    
+    def _delayed_flash_check(self):
+        """Delayed flash player check to avoid thread issues"""
+        flash_path = self.config_manager.get_flash_player_path()
+        
+        # Only show dialog if Flash Player is not installed
+        if not flash_path or not os.path.exists(flash_path):
+            result = self.flash_manager.show_dialog(self.root, "Flash Player", "Flash Player is not installed. Do you want to download it now?")
+            if result:
+                self.flash_manager.download_flash_player(self.root)
     
     def create_ui(self):
         """Create the user interface"""
@@ -282,7 +303,7 @@ class PTDLauncher:
             dialog.clipboard_clear()
             dialog.clipboard_append(url)
             copy_btn.config(text="Copied!")
-            dialog.after(1000, lambda: copy_btn.config(text="Copy URL"))
+            dialog.after(500, lambda: copy_btn.config(text="Copy URL"))
         
         copy_btn = tk.Button(frame, text="Copy URL", command=copy_url, bg="#4A6EA9", fg="white", font=("Arial", 11))
         copy_btn.pack(pady=10)
