@@ -111,10 +111,6 @@ class UpdateManager(BaseManager):
         # Center the window on the parent window
         self.center_window(update_window, root)
 
-        # Set the window icon
-        if platform.system() == "Windows":
-            update_window.iconbitmap(resource_path("resources/favicon-original.ico"))
-        
         # Create content
         tk.Label(update_window, text="The following updates are available:").pack(pady=10)
         

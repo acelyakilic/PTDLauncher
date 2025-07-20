@@ -68,10 +68,6 @@ class BaseManager:
         # Center the dialog on the parent window
         self.center_window(dialog, parent)
 
-        # Set the window icon
-        if platform.system() == "Windows":
-            dialog.iconbitmap("resources/favicon-original.ico")
-        
         # Create dialog content with a frame to allow text wrapping
         message_frame = Frame(dialog, padx=20, pady=10)
         message_frame.pack(fill=tk.BOTH, expand=True)

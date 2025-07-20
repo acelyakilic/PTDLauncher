@@ -20,10 +20,6 @@ class PTDLauncher:
         self.root.geometry("650x400")
         self.root.resizable(False, False)
         
-        # Set the window icon
-        if platform.system() == "Windows":
-            self.root.iconbitmap(resource_path("resources/favicon-original.ico"))
-        
         # Initialize managers
         self.config_manager = ConfigManager()
         self.config_manager.load_config()
@@ -312,10 +308,6 @@ class PTDLauncher:
         
         # Center the window on the parent window
         self._center_window(settings_window)
-        
-        # Set the window icon
-        if platform.system() == "Windows":
-            settings_window.iconbitmap(resource_path("resources/favicon-original.ico"))
         
         # Create the settings UI
         self._create_settings_ui(settings_window)
