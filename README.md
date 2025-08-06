@@ -27,7 +27,7 @@ PTD Launcher is a desktop application that allows you to play **Pokemon Tower De
 ### Setup
 1. Download the latest release from the **Releases** page.
 2. Extract the ZIP file to a location of your choice.
-3. Run `PTDLauncher` to start the application.
+3. Run `ptd_launcher` to start the application.
 
 ## Usage
 
@@ -70,7 +70,7 @@ sudo apt install libgtk2.0-0
    ```
 3. Run the application:
    ```bash
-   python PTDLauncher.py
+   python ptd_launcher.py
    ```
 
 ## License
