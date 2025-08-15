@@ -30,7 +30,7 @@ PTD Launcher is a desktop application that allows you to play **Pokemon Tower De
 
 ## Usage
 
-![PTD Launcher Screenshot](assets/screenshot.png)
+![PTD Launcher Screenshot](assets/screenshotNew.png)
 
 ### Running on Linux
 To make Flash Player work and be able to run games on Linux, execute the following commands:
