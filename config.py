@@ -77,7 +77,6 @@ class ConfigManager(BaseManager):
                     "flash_player": "",
                     "games": {
                         "PTD1": "",
-                        "PTD1RF": "",
                         "PTD1_Hacked": "",
                         "PTD2": "",
                         "PTD2_Hacked": "",

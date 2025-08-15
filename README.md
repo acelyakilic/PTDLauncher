@@ -8,7 +8,6 @@ PTD Launcher is a desktop application that allows you to play **Pokemon Tower De
 ## Features
 - Play multiple **Pokemon Tower Defense** games:
   - PTD 1, PTD 2, and PTD 3 (original versions)
-  - PTD 1 Regional Forms
   - Hacked versions of PTD 1, PTD 2, and PTD 3
 - **Built-in Flash Player management**:
   - Automatic download and updates of Flash Player
@@ -62,7 +61,7 @@ sudo apt install libgtk2.0-0
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/acelyakilic/PTD-Launcher.git
+   git clone https://github.com/d8l8b/PTD-Launcher.git
    ```
 2. Install the required dependencies:
    ```bash

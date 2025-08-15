@@ -186,13 +186,6 @@ class PTDLauncher:
         
         self._create_button(
             games_buttons_frame, 
-            "Play PTD 1 RF", 
-            "#4A6EA9", "white", 
-            lambda: self.play_game("PTD1RF")
-        ).pack(side=tk.LEFT, padx=5)
-        
-        self._create_button(
-            games_buttons_frame, 
             "Play PTD 2", 
             "#4A6EA9", "white", 
             lambda: self.play_game("PTD2")
